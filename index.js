@@ -13,14 +13,7 @@ const createEmployeeRecord = (employeeInfo) => {
 
     },
     createEmployeeRecords = (employees) => {
-        const employeesTable = []
-        for (const employee of employees) {
-            const employeeObject = createEmployeeRecord(employee);
-            employeesTable.push(employeeObject)
-        }
-
-        return employeesTable
-
+        return employees.map(employee => createEmployeeRecord(employee))
     },
 
     createTimeInEvent = (bpRecord, dateStamp) => {
@@ -42,32 +35,31 @@ const createEmployeeRecord = (employeeInfo) => {
         return bpRecord;
     },
     hoursWorkedOnDate = (cRecord, dateStamp) => {
-        // for(const timeRecords of cRecord.timeInEvents) {
-        //     if(dateStamp === timeRecords.date){
-        //         const elapsedTime = (timeRecords.hour - timeRecords.hour) / 100;
-        //     return elapsedTime;
-        //     }
-        // }
-        if (dateStamp === cRecord.timeInEvents[0].date) {
-            const elapsedTime = (cRecord.timeOutEvents[0].hour - cRecord.timeInEvents[0].hour) / 100;
-            return elapsedTime;
-        }
+
+        const timeIns = cRecord.timeInEvents.find(timeRecords =>
+            timeRecords.date === dateStamp);
+        const timeOuts = cRecord.timeOutEvents.find(timeRecords =>
+            timeRecords.date === dateStamp
+        );
+        const hoursWorked = (timeOuts.hour - timeIns.hour) / 100;
+        return hoursWorked;
     },
     wagesEarnedOnDate = (bpRecord, dateStamp) => {
         const elapsedTime = hoursWorkedOnDate(bpRecord, dateStamp)
-        const amountOwed = elapsedTime * parseInt(bpRecord.payPerHour);
+        const amountOwed = elapsedTime * bpRecord.payPerHour;
         return amountOwed;
     },
     allWagesFor = (bpRecord) => {
 
-        const allWages = bpRecord.timeOutEvents.reduce((accumulate, timeRecords) => {
-            wagesEarnedOnDate(bpRecord, timeRecords.date) + accumulate;
-        }, 0)
-        return allWages
+        const allWages = bpRecord.timeOutEvents.reduce((accumulate, timeRecords) =>
+            wagesEarnedOnDate(bpRecord, timeRecords.date) + accumulate, 0)
+        return allWages;
 
 
     },
-    calculatePayroll = () => {
+    calculatePayroll = (employeesRecords) => {
+        return employeesRecords.reduce((totalAmount, employee) =>
+            totalAmount = totalAmount + allWagesFor(employee), 0)
 
     }
 
@@ -78,5 +70,7 @@ updatedBpRecord = createTimeOutEvent(cRecord, "0044-03-14 2100")
 // Earns 54
 updatedBpRecord = createTimeInEvent(cRecord, "0044-03-15 0900")
 updatedBpRecord = createTimeOutEvent(cRecord, "0044-03-15 1100")
+
+// console.log(allWagesFor(cRecord))
 
 console.log(allWagesFor(cRecord))
